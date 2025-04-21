@@ -1,7 +1,8 @@
+/* eslint-disable prettier/prettier */
 import { ConfigType } from "./types";
-import dotenv from "dotenv";
-dotenv.config();
-const {MONGO_URL, MONGO_DB_NAME, PORT, NODE_ENV} = process.env;
+import 'dotenv/config';
+const {MONGO_URL, MONGO_DB_NAME, CALENDARFIC_KEY,
+    PORT, NODE_ENV,CALENDERIC_URL} = process.env;
 
 export const config: ConfigType = {
     MONGO: {
@@ -11,5 +12,9 @@ export const config: ConfigType = {
     GENERAL: {
         port: Number(PORT) || 3000,
         env: NODE_ENV || "development",
+    },
+    CALENDARFIC: {
+        key: CALENDARFIC_KEY || '',
+        url: CALENDERIC_URL || ''
     }
 }

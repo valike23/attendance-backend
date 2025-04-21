@@ -1,4 +1,6 @@
+/* eslint-disable prettier/prettier */
 export class ConfigType {
-    MONGO: {url:string, dbName:string};
-    GENERAL: {port:number, env:string};
+  MONGO: { url: string; dbName: string };
+  GENERAL: { port: number; env: string };
+  CALENDARFIC: { key: string, url: string };
 }
