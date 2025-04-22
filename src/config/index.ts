@@ -2,7 +2,7 @@
 import { ConfigType } from "./types";
 import 'dotenv/config';
 const {MONGO_URL, MONGO_DB_NAME, CALENDARFIC_KEY,
-    PORT, NODE_ENV,CALENDERIC_URL} = process.env;
+    PORT, NODE_ENV,CALENDERIC_URL, GWXPRO_URL, SECRET} = process.env;
 
 export const config: ConfigType = {
     MONGO: {
@@ -12,9 +12,13 @@ export const config: ConfigType = {
     GENERAL: {
         port: Number(PORT) || 3000,
         env: NODE_ENV || "development",
+        secret: SECRET || ''
     },
     CALENDARFIC: {
         key: CALENDARFIC_KEY || '',
         url: CALENDERIC_URL || ''
+    },
+    GWXPRO: {
+        url: GWXPRO_URL || ''
     }
 }

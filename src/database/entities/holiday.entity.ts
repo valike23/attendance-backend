@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 // holiday.entity.ts
-import { Entity, ObjectIdColumn, ObjectId, Column } from 'typeorm';
+import { Entity, Column } from 'typeorm';
+import { BaseEntityWithTimestamps } from './base.entity';
 
 export enum HolidayType {
   NATIONAL = 'Public Holiday',
@@ -9,9 +10,8 @@ export enum HolidayType {
 }
 
 @Entity()
-export class Holiday {
-  @ObjectIdColumn()
-  id: ObjectId;
+export class Holiday extends BaseEntityWithTimestamps {
+  
 
   @Column()
   date: string; // ISO format: "2025-12-25"

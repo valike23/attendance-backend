@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { config } from './config';
 import { HolidayModule } from './modules/holiday/holiday.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
@@ -16,7 +17,8 @@ import { HolidayModule } from './modules/holiday/holiday.module';
       synchronize: config.GENERAL.env !== 'production',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
     }),
-    HolidayModule
+    HolidayModule,
+    UserModule
   ],
   controllers: [AppController],
   providers: [AppService],
