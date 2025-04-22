@@ -9,7 +9,7 @@ import { Role } from 'src/database/entities/role.entity';
 import { User } from 'src/database/entities/user.entity';
 import { LoginDto } from 'src/database/schemas/dtos/login.dto';
 import { ProLoginResp } from 'src/database/types/user.types';
-import {compare, hash } from 'bcrypt';
+import { compare, hash } from 'bcrypt';
 import { MongoRepository, ObjectId, Repository } from 'typeorm';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class UserService {
         private permissionRepo: MongoRepository<Permission>,
         @InjectRepository(Role)
         private roleRepo: Repository<Role>,
-        private readonly jwtService: JwtService 
+        private readonly jwtService: JwtService
     ) { }
 
 
@@ -48,8 +48,8 @@ export class UserService {
             console.log(data);
 
             user = await this.userRepo.findOne({ where: { email } });
-            
-           
+
+
             if (!user) {
                 throw new InternalServerErrorException('User not found after creation');
             }
@@ -57,18 +57,18 @@ export class UserService {
 
         }
 
-      
+
         const isPasswordMatching = await compare(password, user.password);
         if (!isPasswordMatching) throw new UnauthorizedException('Invalid credentials p');
         const permissions = await this.getEffectivePermissions(user);
         user.customPermissionIds = permissions.map(permission => permission.id);
         const payload = {
-            sub: user.id.toString(), // Mongo ObjectId
+            sub: user.id.toString(),
             email: user.email,
             role: user.role,
-          };
-        
-          const token = await this.jwtService.signAsync(payload);
+        };
+
+        const token = await this.jwtService.signAsync(payload);
 
         const { password: userPassword, ...userWithoutPassword } = user;
         console.log(userPassword);
