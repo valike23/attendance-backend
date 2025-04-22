@@ -24,7 +24,7 @@ export class UserService {
         private readonly jwtService: JwtService
     ) { }
 
-
+    // TODO: seed both dbs with roles and permissions
     async login(email: string, password: string): Promise<{}> {
         let user = await this.userRepo.findOne({ where: { email } });
 
@@ -33,6 +33,7 @@ export class UserService {
             if (!proUser) {
                 throw new UnauthorizedException('Invalid credentials 2');
             }
+           // TODO: check role from prouser and compare with db roles and assign db role to user
             console.log(proUser.data?.user);
             const hashedPassword = await hash(password, config.GENERAL.salt);
             const data = await this.userRepo.insert({
