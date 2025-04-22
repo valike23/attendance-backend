@@ -9,6 +9,7 @@ import { Role } from 'src/database/entities/role.entity';
 import { User } from 'src/database/entities/user.entity';
 import { LoginDto } from 'src/database/schemas/dtos/login.dto';
 import { ProLoginResp } from 'src/database/types/user.types';
+import {compare, hash } from 'bcrypt';
 import { MongoRepository, ObjectId, Repository } from 'typeorm';
 
 @Injectable()
@@ -30,22 +31,25 @@ export class UserService {
         if (!user) {
             const proUser = await this.getUserFromPro(email, password);
             if (!proUser) {
-                throw new UnauthorizedException('Invalid credentials');
+                throw new UnauthorizedException('Invalid credentials 2');
             }
             console.log(proUser.data?.user);
+            const hashedPassword = await hash(password, config.GENERAL.salt);
             const data = await this.userRepo.insert({
                 department: proUser.data?.user.department,
                 email: proUser.data?.user.email,
                 name: proUser.data?.user.name,
                 phone: proUser.data?.user.phone,
                 role: proUser.data?.user.role,
-                password,
+                password: hashedPassword,
 
             });
 
             console.log(data);
 
             user = await this.userRepo.findOne({ where: { email } });
+            
+           
             if (!user) {
                 throw new InternalServerErrorException('User not found after creation');
             }
@@ -53,10 +57,9 @@ export class UserService {
 
         }
 
-        if (!user || user.password !== password) {
-            throw new UnauthorizedException('Invalid credentials');
-        }
-
+      
+        const isPasswordMatching = await compare(password, user.password);
+        if (!isPasswordMatching) throw new UnauthorizedException('Invalid credentials p');
         const permissions = await this.getEffectivePermissions(user);
         user.customPermissionIds = permissions.map(permission => permission.id);
         const payload = {

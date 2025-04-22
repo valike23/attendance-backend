@@ -12,7 +12,8 @@ export const config: ConfigType = {
     GENERAL: {
         port: Number(PORT) || 3000,
         env: NODE_ENV || "development",
-        secret: SECRET || ''
+        secret: SECRET || '',
+        salt: 10,
     },
     CALENDARFIC: {
         key: CALENDARFIC_KEY || '',

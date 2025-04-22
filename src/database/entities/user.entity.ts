@@ -7,7 +7,7 @@ import { BaseEntityWithTimestamps } from "./base.entity";
 export class User extends BaseEntityWithTimestamps {
  
 
-  @Column()
+  @Column({unique: true})
   email: string;
 
   @Column()
