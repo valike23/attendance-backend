@@ -9,7 +9,7 @@ import { Role } from 'src/database/entities/role.entity';
 import { User } from 'src/database/entities/user.entity';
 import { LoginDto } from 'src/database/schemas/dtos/login.dto';
 import { ProLoginResp } from 'src/database/types/user.types';
-import { compare, hash } from 'bcrypt';
+import { compare, hash } from 'bcryptjs';
 import { MongoRepository, ObjectId, Repository } from 'typeorm';
 
 @Injectable()
