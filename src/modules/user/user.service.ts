@@ -63,9 +63,9 @@ export class UserService {
         const isPasswordMatching = await compare(password, user.password);
         if (!isPasswordMatching) throw new UnauthorizedException('Invalid credentials p');
         const permissions = await this.getEffectivePermissions(user);
-        user.customPermissionIds = permissions.map(permission => permission.id);
+        user.customPermissionIds = permissions.map(permission => permission._id);
         const payload = {
-            sub: user.id.toString(),
+            sub: user._id.toString(),
             email: user.email,
             role: user.role,
         };
@@ -82,7 +82,7 @@ export class UserService {
             throw new UnauthorizedException('User not found');
         }
 
-        const role = await this.roleRepo.findOneBy({ id: user.roleId });
+        const role = await this.roleRepo.findOneBy({ _id: user.roleId });
 
         const allPermissionIds = [
             ...(role?.permissionIds || []),

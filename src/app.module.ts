@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { config } from './config';
 import { HolidayModule } from './modules/holiday/holiday.module';
 import { UserModule } from './modules/user/user.module';
+import { OfficeModule } from './modules/office/office.module';
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { UserModule } from './modules/user/user.module';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
     }),
     HolidayModule,
-    UserModule
+    UserModule,
+    OfficeModule
   ],
   controllers: [AppController],
   providers: [AppService],

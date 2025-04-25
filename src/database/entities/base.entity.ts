@@ -3,9 +3,9 @@ import { CreateDateColumn, UpdateDateColumn, DeleteDateColumn, ObjectIdColumn, O
 
 export abstract class BaseEntityWithTimestamps {
 
-     @ObjectIdColumn()
-      id: ObjectId;
-      
+  @ObjectIdColumn()
+  _id: ObjectId;
+
   @CreateDateColumn()
   createdAt: Date;
 
