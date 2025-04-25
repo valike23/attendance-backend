@@ -26,6 +26,7 @@ export class UserService {
 
     // TODO: seed both dbs with roles and permissions
     async login(email: string, password: string): Promise<{}> {
+        console.log('login called with email:', email, 'and password:', password);
         let user = await this.userRepo.findOne({ where: { email } });
 
         if (!user) {
