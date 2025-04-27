@@ -1,17 +1,19 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { ObjectId } from 'mongodb';
 import { Office } from 'src/database/entities/office.entity';
 import { User } from 'src/database/entities/user.entity';
 import { CreateOfficeDto, OfficeWithUsersDto } from 'src/database/schemas/dtos/office.dto';
-import { ObjectId, Repository } from 'typeorm';
+import { DataSource,  MongoRepository,  Repository } from 'typeorm';
 
 @Injectable()
 export class OfficeService {
     constructor(
+        @InjectDataSource() private readonly dataSource: DataSource,
         @InjectRepository(Office)
         private officeRepo: Repository<Office>,
         @InjectRepository(User)
-        private userRepo: Repository<User>,
+        private userRepo: MongoRepository<User>,
     ) { }
 
     async createOffice(office: CreateOfficeDto): Promise<Office> {
@@ -39,4 +41,47 @@ export class OfficeService {
             users,
         };
     }
+
+    async addUsersToOffice(officeId: string, userIds: string[]): Promise<Office> {
+        const office = await this.officeRepo.findOne({
+          where: { _id: new ObjectId(officeId) },
+        });
+      
+        if (!office) {
+          throw new NotFoundException('Office not found');
+        }
+      
+        const objectIds = userIds.map(id => new ObjectId(id));
+      
+        const foundUsers = await this.userRepo.find({
+            where: {
+              _id: { $in: objectIds }, // MongoDB query to match user IDs
+            },
+          });
+        
+      
+        if (foundUsers.length !== objectIds.length) {
+          throw new BadRequestException('Some users were not found');
+        }
+      
+        const updatedUserIds = Array.from(new Set([
+          ...(office.userIds || []).map(id => id.toString()),
+          ...objectIds.map(id => id.toString()),
+        ])).map(id => new ObjectId(id));
+      
+        office.userIds = updatedUserIds;
+        await this.officeRepo.save(office);
+      
+        await Promise.all(
+          foundUsers.map(user => {
+            user.officeId = new ObjectId(officeId);
+            return this.userRepo.save(user);
+          }),
+        );
+      
+        return office;
+      }
+      
+      
+      
 }

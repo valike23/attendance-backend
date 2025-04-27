@@ -11,6 +11,7 @@ import { LoginDto } from 'src/database/schemas/dtos/login.dto';
 import { ProLoginResp } from 'src/database/types/user.types';
 import { compare, hash } from 'bcryptjs';
 import { MongoRepository, ObjectId, Repository } from 'typeorm';
+import { Office } from 'src/database/entities/office.entity';
 
 @Injectable()
 export class UserService {
@@ -21,6 +22,8 @@ export class UserService {
         private permissionRepo: MongoRepository<Permission>,
         @InjectRepository(Role)
         private roleRepo: Repository<Role>,
+        @InjectRepository(Office)
+        private officeRepo: MongoRepository<Office>,
         private readonly jwtService: JwtService
     ) { }
 
@@ -28,54 +31,62 @@ export class UserService {
     async login(email: string, password: string): Promise<{}> {
         console.log('login called with email:', email, 'and password:', password);
         let user = await this.userRepo.findOne({ where: { email } });
-
+      
         if (!user) {
-            const proUser = await this.getUserFromPro(email, password);
-            if (!proUser) {
-                throw new UnauthorizedException('Invalid credentials 2');
-            }
-           // TODO: check role from prouser and compare with db roles and assign db role to user
-            console.log(proUser.data?.user);
-            const hashedPassword = await hash(password, config.GENERAL.salt);
-            const data = await this.userRepo.insert({
-                department: proUser.data?.user.department,
-                email: proUser.data?.user.email,
-                name: proUser.data?.user.name,
-                phone: proUser.data?.user.phone,
-                role: proUser.data?.user.role,
-                password: hashedPassword,
-
-            });
-
-            console.log(data);
-
-            user = await this.userRepo.findOne({ where: { email } });
-
-
-            if (!user) {
-                throw new InternalServerErrorException('User not found after creation');
-            }
-
-
+          const proUser = await this.getUserFromPro(email, password);
+          if (!proUser) {
+            throw new UnauthorizedException('Invalid credentials 2');
+          }
+      
+          const hashedPassword = await hash(password, config.GENERAL.salt);
+          await this.userRepo.insert({
+            department: proUser.data?.user.department,
+            email: proUser.data?.user.email,
+            name: proUser.data?.user.name,
+            phone: proUser.data?.user.phone,
+            role: proUser.data?.user.role,
+            password: hashedPassword,
+          });
+      
+          user = await this.userRepo.findOne({ where: { email } });
+      
+          if (!user) {
+            throw new InternalServerErrorException('User not found after creation');
+          }
         }
-
-
+      
         const isPasswordMatching = await compare(password, user.password);
         if (!isPasswordMatching) throw new UnauthorizedException('Invalid credentials p');
+      
         const permissions = await this.getEffectivePermissions(user);
         user.customPermissionIds = permissions.map(permission => permission._id);
+      
         const payload = {
-            sub: user._id.toString(),
-            email: user.email,
-            role: user.role,
+          sub: user._id.toString(),
+          email: user.email,
+          role: user.role,
         };
-
+      
         const token = await this.jwtService.signAsync(payload);
-
+      
         const { password: userPassword, ...userWithoutPassword } = user;
-        console.log(userPassword);
-        return { user: userWithoutPassword, permissions, token };
-    }
+      
+        // 👇 Attach the Office
+        let office : any= null;
+        if (user.officeId) {
+          office = await this.officeRepo.findOneById( user.officeId);
+        }
+      
+        return { 
+          user: { 
+            ...userWithoutPassword,
+            office, // <=== here is the office info
+          },
+          permissions,
+          token 
+        };
+      }
+      
 
     async getEffectivePermissions(user: User): Promise<Permission[]> {
         if (!user) {

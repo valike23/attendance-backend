@@ -24,9 +24,16 @@ export class CreateOfficeDto {
   @IsString()
   hub?: string;
 
- 
+
 }
 
 export class OfficeWithUsersDto extends Office {
-    users: User[];
-  }
+  users: User[];
+}
+
+export class AddUsersToOfficeDto {
+  @IsArray()
+  @IsString({ each: true })
+  userIds: string[];
+}
+

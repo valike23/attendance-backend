@@ -8,9 +8,12 @@ import { Permission } from 'src/database/entities/permission.entity';
 import { Role } from 'src/database/entities/role.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { config } from 'src/config';
+import { Office } from 'src/database/entities/office.entity';
 
 @Module({
-   imports: [TypeOrmModule.forFeature([User, Permission, Role]),  JwtModule.register({
+   imports: [
+    TypeOrmModule.forFeature([User, Permission, Role, Office]),
+     JwtModule.register({
          secret: config.GENERAL.secret, // use env in production
          signOptions: { expiresIn: '7d' },
        }),],
