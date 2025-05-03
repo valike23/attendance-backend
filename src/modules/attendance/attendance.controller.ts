@@ -34,7 +34,7 @@ export class AttendanceController {
 
   @UseGuards(JwtAuthGuard)
   @Get('check-today')
-  async checkIfTodayIsValidWorkingDay(@Query() query: any, @Req() req) {
+  async checkIfTodayIsValidWorkingDay(@Query() query: CheckWorkingDayDto, @Req() req) {
     console.log('Checking if today is a valid working day...', req.user);
     const { officeId } = query;
     return this.attendanceService.isTodayValidAttendanceDay(officeId);
