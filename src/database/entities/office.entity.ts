@@ -22,5 +22,10 @@ export class Office extends BaseEntityWithTimestamps {
   hub?: string;
 
   @Column('array', { nullable: true })
+remoteWorkDays?: number[]; // 0-6 (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+
+  @Column('array', { nullable: true })
   userIds?: ObjectId[];
+
+
 }

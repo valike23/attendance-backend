@@ -7,10 +7,16 @@ import { config } from './config';
 import { HolidayModule } from './modules/holiday/holiday.module';
 import { UserModule } from './modules/user/user.module';
 import { OfficeModule } from './modules/office/office.module';
+import { AttendanceModule } from './modules/attendance/attendance.module';
+import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from './guards/jwt.strategy';
 
 @Module({
   imports: [
-   
+    JwtModule.register({
+      secret: config.GENERAL.secret,
+      signOptions: { expiresIn: '1h' },
+    }),
     TypeOrmModule.forRoot({
       type: 'mongodb',
       url: config.MONGO.url,
@@ -20,9 +26,10 @@ import { OfficeModule } from './modules/office/office.module';
     }),
     HolidayModule,
     UserModule,
-    OfficeModule
+    OfficeModule,
+    AttendanceModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, JwtStrategy],
 })
 export class AppModule {}

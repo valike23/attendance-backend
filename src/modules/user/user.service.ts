@@ -61,13 +61,7 @@ export class UserService {
         const permissions = await this.getEffectivePermissions(user);
         user.customPermissionIds = permissions.map(permission => permission._id);
       
-        const payload = {
-          sub: user._id.toString(),
-          email: user.email,
-          role: user.role,
-        };
       
-        const token = await this.jwtService.signAsync(payload);
       
         const { password: userPassword, ...userWithoutPassword } = user;
       
@@ -76,7 +70,14 @@ export class UserService {
         if (user.officeId) {
           office = await this.officeRepo.findOneById( user.officeId);
         }
+        const payload = {
+          sub: user._id.toString(),
+          email: user.email,
+          role: user.role,
+          office
+        };
       
+        const token = await this.jwtService.signAsync(payload);
         return { 
           user: { 
             ...userWithoutPassword,
