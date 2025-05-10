@@ -8,6 +8,9 @@ export class Role extends BaseEntityWithTimestamps {
   @Column()
   name: string; // e.g., "admin", "staff"
 
+   @Column()
+  description: string;
+
   @Column('array')
   permissionIds: ObjectId[]; // List of permission ObjectIds
 }

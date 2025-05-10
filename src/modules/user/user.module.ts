@@ -9,6 +9,9 @@ import { Role } from 'src/database/entities/role.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { config } from 'src/config';
 import { Office } from 'src/database/entities/office.entity';
+import { PermissionService } from './permission.service';
+import { RolesService } from './role.service';
+import { AuthHelper } from 'src/helpers/auth.helper';
 
 @Module({
    imports: [
@@ -18,7 +21,7 @@ import { Office } from 'src/database/entities/office.entity';
          signOptions: { expiresIn: '7d' },
        }),],
   controllers: [UserController],
-  providers: [UserService],
+  providers: [UserService, PermissionService, RolesService, AuthHelper],
   exports: [JwtModule]
 })
 export class UserModule {}

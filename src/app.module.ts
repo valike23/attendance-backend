@@ -10,6 +10,7 @@ import { OfficeModule } from './modules/office/office.module';
 import { AttendanceModule } from './modules/attendance/attendance.module';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './guards/jwt.strategy';
+import { LeaveModule } from './modules/leave/leave.module';
 
 @Module({
   imports: [
@@ -27,7 +28,8 @@ import { JwtStrategy } from './guards/jwt.strategy';
     HolidayModule,
     UserModule,
     OfficeModule,
-    AttendanceModule
+    AttendanceModule,
+    LeaveModule
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],

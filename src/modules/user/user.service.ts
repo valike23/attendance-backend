@@ -12,6 +12,7 @@ import { ProLoginResp } from 'src/database/types/user.types';
 import { compare, hash } from 'bcryptjs';
 import { MongoRepository, ObjectId, Repository } from 'typeorm';
 import { Office } from 'src/database/entities/office.entity';
+import { AuthHelper } from 'src/helpers/auth.helper';
 
 @Injectable()
 export class UserService {
@@ -24,12 +25,12 @@ export class UserService {
         private roleRepo: Repository<Role>,
         @InjectRepository(Office)
         private officeRepo: MongoRepository<Office>,
-        private readonly jwtService: JwtService
+        private readonly jwtService: JwtService,
+        private readonly authHelper: AuthHelper,
     ) { }
 
     // TODO: seed both dbs with roles and permissions
     async login(email: string, password: string): Promise<{}> {
-        console.log('login called with email:', email, 'and password:', password);
         let user = await this.userRepo.findOne({ where: { email } });
       
         if (!user) {
@@ -58,7 +59,7 @@ export class UserService {
         const isPasswordMatching = await compare(password, user.password);
         if (!isPasswordMatching) throw new UnauthorizedException('Invalid credentials p');
       
-        const permissions = await this.getEffectivePermissions(user);
+        const permissions = await this.authHelper.getEffectivePermissions(user);
         user.customPermissionIds = permissions.map(permission => permission._id);
       
       
@@ -74,6 +75,7 @@ export class UserService {
           sub: user._id.toString(),
           email: user.email,
           role: user.role,
+          customPermissionIds: user.customPermissionIds,
           office
         };
       
@@ -89,28 +91,7 @@ export class UserService {
       }
       
 
-    async getEffectivePermissions(user: User): Promise<Permission[]> {
-        if (!user) {
-            throw new UnauthorizedException('User not found');
-        }
-
-        const role = await this.roleRepo.findOneBy({ _id: user.roleId });
-
-        const allPermissionIds = [
-            ...(role?.permissionIds || []),
-            ...(user.customPermissionIds || []),
-        ];
-
-        const uniquePermissionIds = Array.from(
-            new Set(allPermissionIds.map(id => id.toString()))
-        ).map(id => new ObjectId(id));
-
-        return this.permissionRepo.find({
-            where: {
-                id: { $in: uniquePermissionIds }
-            }
-        });
-    }
+   
 
 
 
