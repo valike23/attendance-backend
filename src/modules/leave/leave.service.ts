@@ -18,6 +18,7 @@ export class LeaveService {
     const leave = this.leaveRepo.create({
       userId: new ObjectId(userId),
       reason: dto.reason,
+      leaveType: dto.leaveType,
       startDate: new Date(dto.startDate),
       endDate: new Date(dto.endDate),
       status: LeaveStatus.PENDING,
