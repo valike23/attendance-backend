@@ -33,6 +33,7 @@ export class LeaveRequest extends BaseEntityWithTimestamps {
   @Column()
   endDate: Date;
 
+
   @Column({ default: LeaveStatus.PENDING }) // pending | approved | rejected
   status: LeaveStatus;
 

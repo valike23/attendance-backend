@@ -14,6 +14,7 @@ export class LeaveService {
 
 
   async applyForLeave(userId: string, dto: CreateLeaveRequestDto): Promise<LeaveRequest> {
+    console.log('the created app here', dto);
     const leave = this.leaveRepo.create({
       userId: new ObjectId(userId),
       reason: dto.reason,
