@@ -24,3 +24,10 @@ export class ReviewLeaveRequestDto {
   @IsString()
   rejectionReason?: string;
 }
+
+export class LeaveDashboardDto {
+  leaves: number;
+  approved: number;
+  pending: number;
+  rejected: number;
+}

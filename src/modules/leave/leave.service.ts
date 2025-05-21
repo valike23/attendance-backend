@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { ObjectId } from 'mongodb';
 import { LeaveRequest, LeaveStatus } from 'src/database/entities/leave-request.entity';
-import { CreateLeaveRequestDto, ReviewLeaveRequestDto } from 'src/database/schemas/dtos/leave.dto';
+import { CreateLeaveRequestDto, LeaveDashboardDto, ReviewLeaveRequestDto } from 'src/database/schemas/dtos/leave.dto';
 import { MongoRepository } from 'typeorm';
 
 @Injectable()
@@ -12,7 +12,31 @@ export class LeaveService {
     private readonly leaveRepo: MongoRepository<LeaveRequest>
   ) { }
 
+async getDashboardStats(userId: string): Promise<LeaveDashboardDto> {
+    const userObjectId = new ObjectId(userId);
 
+    const [leaves, approved, pending, rejected] = await Promise.all([
+      // total requests for this user
+      this.leaveRepo.count({ where: { userId: userObjectId } }),
+
+      // approved for this user
+      this.leaveRepo.count({
+        where: { userId: userObjectId, status: LeaveStatus.APPROVED },
+      }),
+
+      // pending for this user
+      this.leaveRepo.count({
+        where: { userId: userObjectId, status: LeaveStatus.PENDING },
+      }),
+
+      // rejected for this user
+      this.leaveRepo.count({
+        where: { userId: userObjectId, status: LeaveStatus.REJECTED },
+      }),
+    ]);
+
+    return { leaves, approved, pending, rejected };
+  }
   async applyForLeave(userId: string, dto: CreateLeaveRequestDto): Promise<LeaveRequest> {
     console.log('the created app here', dto);
     const leave = this.leaveRepo.create({

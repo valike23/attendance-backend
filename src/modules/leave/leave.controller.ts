@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { CreateLeaveRequestDto, ReviewLeaveRequestDto } from 'src/database/schemas/dtos/leave.dto';
 import { LeaveService } from './leave.service';
 import { PermissionsGuard } from 'src/decorators/permissions/permissions.guard';
@@ -18,6 +18,14 @@ export class LeaveController {
     console.log(req.user);
     const { user } = req;
     return this.leaveService.applyForLeave(user.userId, dto);
+  }
+
+   @Get('summary')
+  @UseGuards(AuthGuard('jwt'))
+  summary( @Req() req: any) {
+   
+    const { user } = req;
+    return this.leaveService.getDashboardStats(user.userId);
   }
 
   @Patch(':id/review')
