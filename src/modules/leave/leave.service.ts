@@ -14,7 +14,7 @@ export class LeaveService {
 
 async getDashboardStats(userId: string): Promise<LeaveDashboardDto> {
     const userObjectId = new ObjectId(userId);
-
+    console.log("the sum user is", userId);
     const [leaves, approved, pending, rejected] = await Promise.all([
       // total requests for this user
       this.leaveRepo.count({ where: { userId: userObjectId } }),
