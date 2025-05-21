@@ -1,6 +1,6 @@
 import { IsDateString, IsNotEmpty } from 'class-validator';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { LeaveStatus, LeaveType } from 'src/database/entities/leave-request.entity';
+import { LeaveRequest, LeaveStatus, LeaveType } from 'src/database/entities/leave-request.entity';
 export class CreateLeaveRequestDto {
   @IsNotEmpty()
   reason: string;
@@ -30,4 +30,12 @@ export class LeaveDashboardDto {
   approved: number;
   pending: number;
   rejected: number;
+}
+
+
+export class PaginatedLeavesDto {
+  data: LeaveRequest[];
+  total: number;
+  page: number;
+  limit: number;
 }

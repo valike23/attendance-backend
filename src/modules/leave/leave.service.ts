@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { ObjectId } from 'mongodb';
 import { LeaveRequest, LeaveStatus } from 'src/database/entities/leave-request.entity';
-import { CreateLeaveRequestDto, LeaveDashboardDto, ReviewLeaveRequestDto } from 'src/database/schemas/dtos/leave.dto';
+import { CreateLeaveRequestDto, LeaveDashboardDto, PaginatedLeavesDto, ReviewLeaveRequestDto } from 'src/database/schemas/dtos/leave.dto';
 import { MongoRepository } from 'typeorm';
 
 @Injectable()
@@ -67,6 +67,27 @@ async getDashboardStats(userId: string): Promise<LeaveDashboardDto> {
     }
 
     return this.leaveRepo.save(leave);
+  }
+
+  async getLeavesByUser(
+    userId: string,
+    page = 1,
+    limit = 10,
+  ): Promise<PaginatedLeavesDto> {
+    const userObjectId = new ObjectId(userId);
+    const skip = (page - 1) * limit;
+
+    const [data, total] = await Promise.all([
+      this.leaveRepo.find({
+        where: { userId: userObjectId },
+        skip,
+        take: limit,
+        order: { startDate: 'DESC' }, 
+      }),
+      this.leaveRepo.count({ userId: userObjectId }),
+    ]);
+
+    return { data, total, page, limit };
   }
 
 
