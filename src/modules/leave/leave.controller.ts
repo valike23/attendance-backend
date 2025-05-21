@@ -20,10 +20,10 @@ export class LeaveController {
     return this.leaveService.applyForLeave(user.userId, dto);
   }
 
-   @Get('summary')
+  @Get('summary')
   @UseGuards(AuthGuard('jwt'))
-  summary( @Req() req: any) {
-   
+  summary(@Req() req: any) {
+
     const { user } = req;
     return this.leaveService.getDashboardStats(user.userId);
   }
@@ -35,14 +35,14 @@ export class LeaveController {
     return this.leaveService.reviewLeaveRequest(id, admin._id.toString(), dto);
   }
 
-   @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'))
   @Get()
   async findMyLeaves(
     @Req() req: any,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
   ): Promise<PaginatedLeavesDto> {
-    
+
     const { user } = req;
     return this.leaveService.getLeavesByUser(user.userId, page, limit);
   }
