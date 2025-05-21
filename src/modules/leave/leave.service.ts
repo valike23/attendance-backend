@@ -13,30 +13,31 @@ export class LeaveService {
   ) { }
 
 async getDashboardStats(userId: string): Promise<LeaveDashboardDto> {
-    const userObjectId = new ObjectId(userId);
-    console.log("the sum user is", userId, userObjectId);
-    const [leaves, approved, pending, rejected] = await Promise.all([
-      // total requests for this user
-      this.leaveRepo.count({ where: { userId: userObjectId } }),
+  const userObjectId = new ObjectId(userId);
 
-      // approved for this user
-      this.leaveRepo.count({
-        where: { userId: userObjectId, status: LeaveStatus.APPROVED },
-      }),
+  const [leaves, approved, pending, rejected] = await Promise.all([
+    // <– filter directly, no “where:” wrapper
+    this.leaveRepo.count({ userId: userObjectId }),
 
-      // pending for this user
-      this.leaveRepo.count({
-        where: { userId: userObjectId, status: LeaveStatus.PENDING },
-      }),
+    this.leaveRepo.count({
+      userId: userObjectId,
+      status: LeaveStatus.APPROVED,
+    }),
 
-      // rejected for this user
-      this.leaveRepo.count({
-        where: { userId: userObjectId, status: LeaveStatus.REJECTED },
-      }),
-    ]);
-console.log(leaves, approved, pending, rejected);
-    return { leaves, approved, pending, rejected };
-  }
+    this.leaveRepo.count({
+      userId: userObjectId,
+      status: LeaveStatus.PENDING,
+    }),
+
+    this.leaveRepo.count({
+      userId: userObjectId,
+      status: LeaveStatus.REJECTED,
+    }),
+  ]);
+
+  return { leaves, approved, pending, rejected };
+}
+
   async applyForLeave(userId: string, dto: CreateLeaveRequestDto): Promise<LeaveRequest> {
     console.log('the created app here', dto);
     const leave = this.leaveRepo.create({
