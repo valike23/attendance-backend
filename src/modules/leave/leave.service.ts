@@ -34,7 +34,7 @@ async getDashboardStats(userId: string): Promise<LeaveDashboardDto> {
         where: { userId: userObjectId, status: LeaveStatus.REJECTED },
       }),
     ]);
-
+console.log(leaves, approved, pending, rejected);
     return { leaves, approved, pending, rejected };
   }
   async applyForLeave(userId: string, dto: CreateLeaveRequestDto): Promise<LeaveRequest> {
