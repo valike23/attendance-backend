@@ -21,7 +21,7 @@ export class OfficeController {
 
   @Put('temp')
   tempUpdate(@Body() body: CreateOfficeDto) {
-    return this.officeService.createOffice(body);
+    return this.officeService.createorUpdate(body);
   }
 
   @Get(':id')
