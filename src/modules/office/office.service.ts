@@ -22,7 +22,7 @@ export class OfficeService {
     }
 
     async createorUpdate(office: CreateOfficeDto): Promise<Office> {
-      const myOffice = await this.officeRepo.findOne({where:{name: office.name}});
+      const myOffice = await this.officeRepo.findOne({where:{hub: office.hub}});
       if(!myOffice){
          const newOffice = this.officeRepo.create(office);
         return this.officeRepo.save(newOffice);
