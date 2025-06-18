@@ -20,6 +20,21 @@ export class OfficeService {
         const newOffice = this.officeRepo.create(office);
         return this.officeRepo.save(newOffice);
     }
+
+    async createorUpdate(office: CreateOfficeDto): Promise<Office> {
+      const myOffice = await this.officeRepo.findOne({where:{name: office.name}});
+      if(!myOffice){
+         const newOffice = this.officeRepo.create(office);
+        return this.officeRepo.save(newOffice);
+      }
+      else {
+      const resp = await this.officeRepo.update({hub: myOffice.hub}, {address: office.address, latitude: office.latitude, longitude: office.longitude});
+      return {_id: myOffice._id,address: office.address, 
+        longitude: office.longitude, name: myOffice.name,updatedAt: new Date(),
+        latitude: office.latitude, createdAt: myOffice.createdAt}
+      }
+      
+    }
     async getAllOffices(): Promise<Office[]> {
         return this.officeRepo.find();
     }

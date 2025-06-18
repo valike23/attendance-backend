@@ -18,6 +18,12 @@ export class OfficeController {
     return this.officeService.createOffice(body);
   }
 
+
+  @Put('temp')
+  tempUpdate(@Body() body: CreateOfficeDto) {
+    return this.officeService.createOffice(body);
+  }
+
   @Get(':id')
   async getOfficeWithUsers(@Param('id') id: string): Promise<OfficeWithUsersDto> {
     return this.officeService.getOfficeWithUsers(id);
