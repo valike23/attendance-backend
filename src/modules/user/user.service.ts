@@ -35,6 +35,7 @@ export class UserService {
       
         if (!user) {
           const proUser = await this.getUserFromPro(email, password);
+          console.log('the prouser is', proUser);
           if (!proUser) {
             throw new UnauthorizedException('Invalid credentials 2');
           }
