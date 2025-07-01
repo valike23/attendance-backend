@@ -20,7 +20,7 @@ export class UserController {
         return this.userService.login(body.email, body.password);
     }
 
-    @Get('users')
+    @Get('all')
     async getAllUsers(){
       return this.userService.getAllUsers()
     }
