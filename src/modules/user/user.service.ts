@@ -90,6 +90,10 @@ export class UserService {
           token 
         };
       }
+
+      async getAllUsers(){
+        return this.userRepo.find();
+      }
       
 
    

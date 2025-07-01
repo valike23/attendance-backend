@@ -20,6 +20,11 @@ export class UserController {
         return this.userService.login(body.email, body.password);
     }
 
+    @Get('users')
+    async getAllUsers(){
+      return this.userService.getAllUsers()
+    }
+
     @Post('role')
     create(@Body() dto: CreateRoleDto) {
         return this.rolesService.createRole(dto);
