@@ -13,6 +13,11 @@ export class OfficeController {
     return this.officeService.getAllOffices();
   }
 
+  @Get('/:id')
+  findOne(@Param('id') id: string){
+    return this.officeService.getSingleOffice(id);
+  }
+
   @Post()
   createOffice(@Body() body: CreateOfficeDto) {
     return this.officeService.createOffice(body);
