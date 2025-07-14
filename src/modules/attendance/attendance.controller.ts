@@ -7,19 +7,23 @@ import { CheckWorkingDayDto } from 'src/database/schemas/dtos/attendance.dto';
 
 @Controller('attendance')
 export class AttendanceController {
-  constructor(private readonly attendanceService: AttendanceService) {}
+  constructor(private readonly attendanceService: AttendanceService) { }
 
+
+  @UseGuards(JwtAuthGuard)
   @Post('clock-in')
   async clockIn(@Req() req) {
     console.log('the user is ', req.user);
     return this.attendanceService.clockIn(req.user.sub); // req.user.sub = userId from JWT
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('break')
   async logBreak(@Req() req) {
     return this.attendanceService.logBreak(req.user.sub);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('clock-out')
   async clockOut(@Req() req) {
     return this.attendanceService.clockOut(req.user.sub);
@@ -29,7 +33,7 @@ export class AttendanceController {
   @Get('today/:date')
   async getAttendance(@Req() req, @Param('date') date: string) {
     console.log('Getting attendance for date:', date, req.user);
-    const userId = req.user.sub; 
+    const userId = req.user.sub;
     return this.attendanceService.getAttendance(userId, new Date(date));
   }
 
