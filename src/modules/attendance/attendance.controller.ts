@@ -14,19 +14,19 @@ export class AttendanceController {
   @Post('clock-in')
   async clockIn(@Req() req) {
     console.log('the user is ', req.user);
-    return this.attendanceService.clockIn(req.user.sub); // req.user.sub = userId from JWT
+    return this.attendanceService.clockIn(req.user.userId); // req.user.sub = userId from JWT
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('break')
   async logBreak(@Req() req) {
-    return this.attendanceService.logBreak(req.user.sub);
+    return this.attendanceService.logBreak(req.user.userId);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('clock-out')
   async clockOut(@Req() req) {
-    return this.attendanceService.clockOut(req.user.sub);
+    return this.attendanceService.clockOut(req.user.userId);
   }
 
   @UseGuards(JwtAuthGuard)
