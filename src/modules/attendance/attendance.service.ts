@@ -149,4 +149,6 @@ console.log('Today:', today, 'Weekday:', weekday, officeId);
 
     return { valid: true };
   }
+
+  
 }

@@ -11,6 +11,7 @@ export class AttendanceController {
 
   @Post('clock-in')
   async clockIn(@Req() req) {
+    console.log('the user is ', req.user);
     return this.attendanceService.clockIn(req.user.sub); // req.user.sub = userId from JWT
   }
 
