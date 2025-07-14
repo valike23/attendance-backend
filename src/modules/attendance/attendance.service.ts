@@ -29,16 +29,14 @@ export class AttendanceService {
 
   private async getSettings() {
     let settings = await this.settingsRepo.findOne({});
-    if (!settings) {
-      settings = this.settingsRepo.create({});
-      await this.settingsRepo.save(settings);
-    }
+   console.log("the final settings", settings);
     return settings;
   }
 
   async clockIn(userId: string): Promise<Attendance> {
     const today = await this.getTodayWATDate();
     const settings = await this.getSettings();
+    if(!settings) throw new Error('Missing workStartTime in settings.');
     const [workHour, workMinute] = settings.workStartTime.split(':').map(Number);
 
     const expectedStart = new Date(today);
