@@ -44,5 +44,16 @@ export class AttendanceController {
     const { officeId } = query;
     return this.attendanceService.isTodayValidAttendanceDay(officeId);
   }
+
+  @Get('/attendance-summary')
+getAttendanceSummary() {
+  return this.attendanceService.getAttendanceSummary();
+}
+
+@UseGuards(JwtAuthGuard)
+@Get('/attendance-summary/single')
+getAttendanceSummarySingle(@Req() req) {
+  return this.attendanceService.getUserAttendanceSummary(req.user.userId);
+}
 }
 

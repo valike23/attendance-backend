@@ -148,5 +148,75 @@ console.log('Today:', today, 'Weekday:', weekday, officeId);
     return { valid: true };
   }
 
+ async getAttendanceSummary(): Promise<Record<AttendanceStatus, number>> {
+  const pipeline = [
+    {
+      $group: {
+        _id: '$status',
+        count: { $sum: 1 },
+      },
+    },
+  ];
+
+  const result = await this.attendanceRepo
+    .aggregate(pipeline)
+    .toArray() as unknown as { _id: string; count: number }[];
+
+  const summary: Record<AttendanceStatus, number> = {
+    [AttendanceStatus.PRESENT]: 0,
+    [AttendanceStatus.LATE]: 0,
+    [AttendanceStatus.ABSENT]: 0,
+    [AttendanceStatus.ON_LEAVE]: 0,
+    [AttendanceStatus.ON_GOING]: 0,
+  };
+
+  for (const row of result) {
+    const status = row._id as AttendanceStatus;
+    if (status in summary) {
+      summary[status] = row.count;
+    }
+  }
+
+  return summary;
+}
+
+
+async getUserAttendanceSummary(userId: string): Promise<Record<AttendanceStatus, number>> {
+  const pipeline = [
+    {
+      $match: {
+        userId: new ObjectId(userId),
+      },
+    },
+    {
+      $group: {
+        _id: '$status',
+        count: { $sum: 1 },
+      },
+    },
+  ];
+
+  const result = await this.attendanceRepo
+    .aggregate(pipeline)
+    .toArray() as unknown as { _id: string; count: number }[];
+
+  const summary: Record<AttendanceStatus, number> = {
+    [AttendanceStatus.PRESENT]: 0,
+    [AttendanceStatus.LATE]: 0,
+    [AttendanceStatus.ABSENT]: 0,
+    [AttendanceStatus.ON_LEAVE]: 0,
+    [AttendanceStatus.ON_GOING]: 0,
+  };
+
+  for (const row of result) {
+    const status = row._id as AttendanceStatus;
+    if (status in summary) {
+      summary[status] = row.count;
+    }
+  }
+
+  return summary;
+}
+
   
 }
