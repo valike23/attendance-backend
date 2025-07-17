@@ -5,7 +5,7 @@ import { Attendance, AttendanceStatus } from "src/database/entities/attendance.e
 import { Holiday, HolidayType } from "src/database/entities/holiday.entity";
 import { Office } from "src/database/entities/office.entity";
 import { Settings } from "src/database/entities/settings.entity";
-import { MongoRepository } from "typeorm";
+import { Between, MongoRepository } from "typeorm";
 
 @Injectable()
 export class AttendanceService {
@@ -216,6 +216,82 @@ async getUserAttendanceSummary(userId: string): Promise<Record<AttendanceStatus,
   }
 
   return summary;
+}
+
+private async getWorkingDays(start: Date, end: Date): Promise<number> {
+    let count = 0;
+    const current = new Date(start);
+
+    const holidays = await this.holidayRepo.find({
+      where: {
+        date: Between(
+          start.toISOString().split('T')[0],
+          end.toISOString().split('T')[0],
+        ),
+      },
+    });
+
+    const holidayDates = new Set(holidays.map((h) => h.date));
+
+    while (current <= end) {
+      const isWeekend = current.getDay() === 0 || current.getDay() === 6;
+      const isoDate = current.toISOString().split('T')[0];
+
+      if (!isWeekend && !holidayDates.has(isoDate)) {
+        count++;
+      }
+
+      current.setDate(current.getDate() + 1);
+    }
+
+    return count;
+  }
+
+  private formatTime(date: Date): string {
+  const options: Intl.DateTimeFormatOptions = {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: 'Africa/Lagos',
+  };
+
+  return new Intl.DateTimeFormat('en-US', options).format(date);
+}
+
+
+async getDashboardSummary(userId: string, dateStr?: string) {
+  const baseDate = dateStr ? new Date(dateStr) : new Date();
+  const firstDay = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
+  const lastDay = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0);
+
+  const records = await this.attendanceRepo.find({
+    where: {
+      userId: new ObjectId(userId),
+      date: {
+        $gte: firstDay,
+        $lte: lastDay,
+      },
+    },
+    order: {
+      date: 'DESC',
+    },
+  });
+
+  const presentDays = records.filter(
+    (record) => record.status === AttendanceStatus.PRESENT,
+  ).length;
+
+  const totalDays = this.getWorkingDays(firstDay, lastDay);
+
+  const lastCheckInTime = records[0]?.resumptionTime;
+
+  return {
+    present: presentDays,
+    total: totalDays,
+    lastCheckInTime: lastCheckInTime
+      ? this.formatTime(lastCheckInTime)
+      : null,
+  };
 }
 
   
