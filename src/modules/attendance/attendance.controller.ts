@@ -57,7 +57,7 @@ getAttendanceSummarySingle(@Req() req) {
 }
 
 @UseGuards(JwtAuthGuard)
-@Get('summary/:userId')
+@Get('summary')
   getUserSummary(
     @Req() req,
     @Query('date') date?: string,
