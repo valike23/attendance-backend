@@ -281,7 +281,7 @@ async getDashboardSummary(userId: string, dateStr?: string) {
     (record) => record.status === AttendanceStatus.PRESENT,
   ).length;
 
-  const totalDays = this.getWorkingDays(firstDay, lastDay);
+  const totalDays =await this.getWorkingDays(firstDay, lastDay);
 
   const lastCheckInTime = records[0]?.resumptionTime;
 
