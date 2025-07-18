@@ -294,5 +294,42 @@ async getDashboardSummary(userId: string, dateStr?: string) {
   };
 }
 
+async getUserAttendanceBreakdown(userId: string, dateStr?: string) {
+  const baseDate = dateStr ? new Date(dateStr) : new Date();
+  const firstDay = new Date(baseDate.getFullYear(), baseDate.getMonth(), 1);
+  const lastDay = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0);
+
+  const records = await this.attendanceRepo.find({
+    where: {
+      userId: new ObjectId(userId),
+      date: {
+        $gte: firstDay,
+        $lte: lastDay,
+      },
+    },
+  });
+
+  const counts: Record<AttendanceStatus, number> = {
+    present: 0,
+    late: 0,
+    absent: 0,
+    'on-leave': 0,
+    'on-going': 0,
+  };
+
+  for (const record of records) {
+    const status = record.status;
+    if (counts[status] !== undefined) {
+      counts[status]++;
+    }
+  }
+
+  return {
+    ...counts,
+    total: records.length,
+  };
+}
+
+
   
 }

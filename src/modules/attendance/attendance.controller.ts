@@ -64,5 +64,14 @@ getAttendanceSummarySingle(@Req() req) {
   ) {
     return this.attendanceService.getDashboardSummary(req.user.userId, date);
   }
+
+  @UseGuards(JwtAuthGuard)
+@Get('breakdown')
+  getBreakDown(
+    @Req() req,
+    @Query('date') date?: string,
+  ) {
+    return this.attendanceService.getUserAttendanceBreakdown(req.user.userId, date);
+  }
 }
 
