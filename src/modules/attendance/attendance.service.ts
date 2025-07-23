@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ObjectId } from "mongodb";
 import { Attendance, AttendanceStatus } from "src/database/entities/attendance.entity";
@@ -348,12 +348,14 @@ async getUserAttendanceBreakdown(userId: string, dateStr?: string) {
 }
 
 async getPaginatedFlatAttendance(
-  officeId: string,
+  officeId: any,
   startDate: Date,
   endDate: Date,
   page = 1,
   limit = 7,
 ) {
+ 
+
   const allDates = this.getDateStringsInRange(startDate, endDate);
   const totalDates = allDates.length;
 

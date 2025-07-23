@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { OfficeService } from './office.service';
 import { AddUsersToOfficeDto, CreateOfficeDto, OfficeWithUsersDto } from 'src/database/schemas/dtos/office.dto';
 import { AttendanceService } from '../attendance/attendance.service';
+import { ObjectId } from 'mongodb';
 
 @Controller('office')
 export class OfficeController {
@@ -15,10 +16,32 @@ export class OfficeController {
     return this.officeService.getAllOffices();
   }
 
-  @Get('/:id')
-  findOne(@Param('id') id: string){
-    return this.officeService.getSingleOffice(id);
-  }
+    @Get('office-attendance')
+async getFlatPaginatedAttendance(
+  @Query('officeId') officeId: string,
+  @Query('startDate') startDate: string,
+  @Query('endDate') endDate: string,
+  @Query('page') page = 1,
+  @Query('limit') limit = 7, 
+) {
+  console.log("kelvin faggi")
+   console.log("the office id", officeId);
+let officeObjectId: ObjectId;
+try {
+  officeObjectId = new ObjectId(officeId);
+} catch (err) {
+  throw new BadRequestException('Invalid officeId');
+}
+  return this.attendanceService.getPaginatedFlatAttendance(
+    officeObjectId,
+    new Date(startDate),
+    new Date(endDate),
+    Number(page),
+    Number(limit),
+  );
+}
+
+
 
   @Post()
   createOffice(@Body() body: CreateOfficeDto) {
@@ -44,22 +67,10 @@ export class OfficeController {
     return this.officeService.addUsersToOffice(id, body.userIds);
   }
 
-  @Get('office-attendance')
-async getFlatPaginatedAttendance(
-  @Query('officeId') officeId: string,
-  @Query('startDate') startDate: string,
-  @Query('endDate') endDate: string,
-  @Query('page') page = 1,
-  @Query('limit') limit = 7, 
-) {
-  return this.attendanceService.getPaginatedFlatAttendance(
-    officeId,
-    new Date(startDate),
-    new Date(endDate),
-    Number(page),
-    Number(limit),
-  );
-}
 
+  @Get('/:id')
+  findOne(@Param('id') id: string){
+    return this.officeService.getSingleOffice(id);
+  }
 
 }
