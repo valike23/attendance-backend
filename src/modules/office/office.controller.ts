@@ -41,6 +41,28 @@ try {
   );
 }
 
+@Get('office-attendance/export')
+async exportFlatAttendance(
+  @Query('officeId') officeId: string,
+  @Query('startDate') startDate: string,
+  @Query('endDate') endDate: string,
+) {
+  let officeObjectId: ObjectId;
+  try {
+    officeObjectId = new ObjectId(officeId);
+  } catch (err) {
+    throw new BadRequestException('Invalid officeId');
+  }
+
+  return this.attendanceService.getPaginatedFlatAttendance(
+    officeObjectId,
+    new Date(startDate),
+    new Date(endDate),
+     1,
+    Number.MAX_SAFE_INTEGER,
+  );
+}
+
 
 
   @Post()
