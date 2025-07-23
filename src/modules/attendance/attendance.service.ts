@@ -3,9 +3,22 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { ObjectId } from "mongodb";
 import { Attendance, AttendanceStatus } from "src/database/entities/attendance.entity";
 import { Holiday, HolidayType } from "src/database/entities/holiday.entity";
+import { LeaveRequest } from "src/database/entities/leave-request.entity";
 import { Office } from "src/database/entities/office.entity";
 import { Settings } from "src/database/entities/settings.entity";
+import { User } from "src/database/entities/user.entity";
 import { Between, MongoRepository } from "typeorm";
+
+  export type FlatAttendance = {
+    user: string;
+    date: string;
+    status: any;
+    resumptionTime: any;
+    breakTime: any;
+    endTime: any;
+    isHoliday: boolean;
+    onLeave: boolean;
+  };
 
 @Injectable()
 export class AttendanceService {
@@ -18,6 +31,10 @@ export class AttendanceService {
     private readonly officeRepo: MongoRepository<Office>,
     @InjectRepository(Holiday)
     private readonly holidayRepo: MongoRepository<Holiday>,
+     @InjectRepository(User)
+    private readonly userRepo: MongoRepository<User>,
+     @InjectRepository(LeaveRequest)
+    private readonly leaveRequestRepo: MongoRepository<LeaveRequest>,
   ) {}
 
    async getTodayWATDate(): Promise<Date> {
@@ -330,6 +347,105 @@ async getUserAttendanceBreakdown(userId: string, dateStr?: string) {
   };
 }
 
+async getPaginatedFlatAttendance(
+  officeId: string,
+  startDate: Date,
+  endDate: Date,
+  page = 1,
+  limit = 7,
+) {
+  const allDates = this.getDateStringsInRange(startDate, endDate);
+  const totalDates = allDates.length;
+
+  const paginatedDates = allDates.slice((page - 1) * limit, page * limit);
+
+  const users = await this.userRepo.find({ officeId });
+
+  if (users.length === 0) return [];
+
+  const userIds = users.map(user => user._id);
+
+  const attendances = await this.attendanceRepo.find({
+    userId: { $in: userIds },
+    date: {
+      $gte: new Date(paginatedDates[0]),
+      $lte: new Date(paginatedDates[paginatedDates.length - 1]),
+    },
+  });
+
+  const holidays = await this.holidayRepo.find({
+    date: { $in: paginatedDates },
+  });
+
+  const leaves = await this.leaveRequestRepo.find({
+    userId: { $in: userIds },
+    status: 'approved',
+    $or: [
+      { startDate: { $lte: new Date(paginatedDates[paginatedDates.length - 1]) }, endDate: { $gte: new Date(paginatedDates[0]) } },
+    ],
+  });
+
+  const holidayMap = new Set(holidays.map(h => h.date));
+  const leaveMap = new Map();
+
+  for (const leave of leaves) {
+    const range = this.getDateStringsInRange(leave.startDate, leave.endDate);
+    range.forEach(dateStr => {
+      if (!leaveMap.has(leave.userId.toString())) {
+        leaveMap.set(leave.userId.toString(), new Set());
+      }
+      leaveMap.get(leave.userId.toString()).add(dateStr);
+    });
+  }
+
+  const attendanceMap = new Map(); 
+  for (const a of attendances) {
+    const key = `${a.userId.toString()}|${a.date.toISOString().split('T')[0]}`;
+    attendanceMap.set(key, a);
+  }
+
+
+
+  const flatResults: FlatAttendance[] = [];
+
+  for (const user of users) {
+    for (const dateStr of paginatedDates) {
+      const key = `${user._id.toString()}|${dateStr}`;
+      const attendance = attendanceMap.get(key);
+
+      flatResults.push({
+        user: user.name,
+        date: dateStr,
+        status: attendance?.status || 'absent',
+        resumptionTime: attendance?.resumptionTime || null,
+        breakTime: attendance?.breakTime || null,
+        endTime: attendance?.endTime || null,
+        isHoliday: holidayMap.has(dateStr),
+        onLeave: leaveMap.get(user._id.toString())?.has(dateStr) || false,
+      });
+    }
+  }
+
+  return {
+    data: flatResults,
+    meta: {
+      currentPage: page,
+      perPage: limit,
+      totalDates,
+      totalPages: Math.ceil(totalDates / limit),
+    },
+  };
+}
+
+private getDateStringsInRange(start: Date, end: Date): string[] {
+  const dates: string[] = [];
+  const cur = new Date(start);
+  while (cur <= end) {
+    dates.push(cur.toISOString().split('T')[0]);
+    cur.setDate(cur.getDate() + 1);
+  }
+  return dates;
+}
 
   
 }

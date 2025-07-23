@@ -1,11 +1,13 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { OfficeService } from './office.service';
 import { AddUsersToOfficeDto, CreateOfficeDto, OfficeWithUsersDto } from 'src/database/schemas/dtos/office.dto';
+import { AttendanceService } from '../attendance/attendance.service';
 
 @Controller('office')
 export class OfficeController {
   constructor(
     private readonly officeService: OfficeService,
+    private readonly attendanceService: AttendanceService
   ) { }
   @Get()
   findAll() {
@@ -41,6 +43,23 @@ export class OfficeController {
   ) {
     return this.officeService.addUsersToOffice(id, body.userIds);
   }
+
+  @Get('office-attendance')
+async getFlatPaginatedAttendance(
+  @Query('officeId') officeId: string,
+  @Query('startDate') startDate: string,
+  @Query('endDate') endDate: string,
+  @Query('page') page = 1,
+  @Query('limit') limit = 7, 
+) {
+  return this.attendanceService.getPaginatedFlatAttendance(
+    officeId,
+    new Date(startDate),
+    new Date(endDate),
+    Number(page),
+    Number(limit),
+  );
+}
 
 
 }
